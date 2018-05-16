@@ -14,10 +14,9 @@ class CreateBancosTable extends Migration
     public function up()
     {
         Schema::create('bancos', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('codigo', 4);
-            $table->string('nombre', 60);
-            $table->unique('codigo');
+            $table->string('bankCode', 8);
+            $table->string('bankName', 60);
+            $table->primary('bankCode');
         });
     }
 

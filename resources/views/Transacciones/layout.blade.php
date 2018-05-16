@@ -52,8 +52,8 @@
         <title>Pagos PSE</title>
     </head>
     <body>
-        <div class="content">
-            <div class="title m-b-md">
+        <div class="container-fluid">
+            <div class="title m-b-md content">
                 Pagos PSE
             </div>
         

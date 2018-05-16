@@ -28,6 +28,7 @@ class CreateEntidadesTable extends Migration
             $table->timestamps();
             $table->foreign('tipo_doc')->references('id')->on('tipo_documentos');
             $table->foreign('ciudad')->references('codigo_dane')->on('municipios');
+            $table->unique('documento');
         });
     }
 
