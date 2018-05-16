@@ -9,6 +9,7 @@ use App\models\Departamentos;
 use App\models\Municipios;
 use App\models\Entidades;
 use App\models\Bancos;
+use App\models\TransactionTraz;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -100,8 +101,7 @@ class TransaccionesController extends Controller
         try {
             $auth = $this->auth();
             $soapClient = new SoapClient($this->URL, array('encoding' => 'UTF-8'));
-            
-            $result = $soapClient->$funcion(['auth'=> $auth, $data]);
+            $result = $soapClient->$funcion(array_merge(array('auth'=> $auth), $data));
             return $result;
         } catch (\Exception $e) {
             return false;
@@ -114,7 +114,7 @@ class TransaccionesController extends Controller
         $cache_id = 'bankCache';
         $minCache = 1440;
         
-        // Cache::put($cache_id, null , $minCache);
+        Cache::put($cache_id, null , $minCache);
         $banks= Cache::get($cache_id);
         if ($banks === null) {
             if ($result= $this->soapPSE('getBankList')){
@@ -150,7 +150,6 @@ class TransaccionesController extends Controller
         unset($data['id']);
         unset($data['created_at']);
         unset($data['updated_at']);
-        $data['additionalData']= array();
         $data['payer']= Entidades::find($data['payer'])->toArray();
         $data['payer']['tipo_doc']= TipoDocumentos::find($data['payer']['tipo_doc'])->tipo;
         unset($data['payer']['id']);
@@ -168,12 +167,14 @@ class TransaccionesController extends Controller
             unset($data['buyer']['created_at']);
             unset($data['buyer']['updated_at']);
         }
+        $data['additionalData']= array();
 
-        dd($data);
-
-        if ($result= $this->soapPSE('PSETransactionRequest')){
-            $banks = $result->getBankListResult->item;
+        if ($result= $this->soapPSE('createTransaction', ['transaction'=> $data])){
+            $traz= new TransactionTraz();
+            $traz->request= $data->toJson();
+            $traz->response= $result->PSETransactionResponse->toJson();
+            $traz->save();
         }
-        return $banks;
+        return redirect($result->PSETransactionResponse->bankURL);
     }
 }
