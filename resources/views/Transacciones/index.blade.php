@@ -14,11 +14,13 @@
                         <div class="cols-sm-10 input-group">
                             <span class="input-group-addon"><i class="fa {{ $item['icon'] }} fa" aria-hidden="true"></i></span>
                             @if ($item['type'] == 'select')
-                                {{ Form::select($item['name'], $item['data'], null, ['placeholder' => $item['place'], 'class'=> 'form-control']) }}
+                                {{ Form::select($item['name'], $item['data'], null, ['placeholder' => $item['place'], 'class'=> 'form-control', (!empty($item['required']) ? 'required' : '') ]) }}
+                            @elseif ($item['type'] == 'email')
+                                {{ Form::email($item['name'], null, ['placeholder' => $item['place'], 'class'=> 'form-control', (!empty($item['required']) ? 'required' : ''), 'pattern'=> ".+@.+\..+" ]) }}
                             @elseif ($item['type'] == 'text')
-                                {{ Form::text($item['name'], null, ['placeholder' => $item['place'], 'class'=> 'form-control', 'required']) }}
+                                {{ Form::text($item['name'], null, ['placeholder' => $item['place'], 'class'=> 'form-control', (!empty($item['required']) ? 'required' : '') ]) }}
                             @elseif ($item['type'] == 'number')
-                                {{ Form::text($item['name'], null, ['placeholder' => $item['place'], 'class'=> 'form-control', 'required']) }}
+                                {{ Form::number($item['name'], null, ['placeholder' => $item['place'], 'class'=> 'form-control', (!empty($item['required']) ? 'required' : '') ]) }}
                             @endif
                         </div>
                     </div>

@@ -17,7 +17,7 @@ class CreateTransaccionesTable extends Migration
             $table->increments('id');
             $table->string('bankCode', 8);
             $table->unsignedInteger('bankInterface');
-            $table->string('returnURL', 255)->default('www.pagos-pse.com/transacciones/retorno');
+            $table->string('returnURL', 255)->default('http://pagospse.com/transacciones/retorno');
             $table->string('reference', 32);
             $table->string('description', 255)->default('Descripción de prueba');
             $table->string('language', 2)->default('ES');

@@ -18,7 +18,7 @@ class CreateEntidadesTable extends Migration
             $table->unsignedInteger('documentType');
             $table->string('document', 12);
             $table->string('firstName', 60);
-            $table->string('lastName', 60);
+            $table->string('lastName', 60)->nullable();
             $table->string('company', 60)->nullable();
             $table->string('emailAddress', 80);
             $table->string('address', 100);

@@ -35,14 +35,14 @@ class TransaccionesController extends Controller
         $deps= Departamentos::all()->pluck('nombre', 'codigo_dane');
         $muns= Municipios::all()->pluck('nombre', 'codigo_dane');
         $form= array(
-            ['type'=> 'select', 'name'=> 'documentType', 'label'=> 'Tipo de documento', 'place'=> 'Ingresa tu tipo de documento', 'icon'=> 'fa-id-card', 'data'=> $docs],
-            ['type'=> 'number', 'name'=> 'document', 'label'=> 'Numero de documento', 'place'=> 'Ingresa tu numero de documento', 'icon'=> 'fa-id-card'],
-            ['type'=> 'text', 'name'=> 'firstName', 'label'=> 'Nombres', 'place'=> 'Ingresa tus nombres', 'icon'=> 'fa-user'],
+            ['type'=> 'select', 'name'=> 'documentType', 'label'=> 'Tipo de documento', 'place'=> 'Ingresa tu tipo de documento', 'icon'=> 'fa-id-card', 'data'=> $docs, 'required'=> true],
+            ['type'=> 'number', 'name'=> 'document', 'label'=> 'Numero de documento', 'place'=> 'Ingresa tu numero de documento', 'icon'=> 'fa-id-card', 'required'=> true],
+            ['type'=> 'text', 'name'=> 'firstName', 'label'=> 'Nombres', 'place'=> 'Ingresa tus nombres', 'icon'=> 'fa-user', 'required'=> true],
             ['type'=> 'text', 'name'=> 'lastName', 'label'=> 'Apellidos', 'place'=> 'Ingresa tus apellidos', 'icon'=> 'fa-user'],
-            ['type'=> 'text', 'name'=> 'emailAddress', 'label'=> 'Email', 'place'=> 'Ingresa tu email', 'icon'=> 'fa-envelope'],
-            ['type'=> 'text', 'name'=> 'address', 'label'=> 'Dirección', 'place'=> 'Ingresa tu dirección', 'icon'=> 'fa-list-alt'],
+            ['type'=> 'email', 'name'=> 'emailAddress', 'label'=> 'Email', 'place'=> 'Ingresa tu email', 'icon'=> 'fa-envelope', 'required'=> true],
+            ['type'=> 'text', 'name'=> 'address', 'label'=> 'Dirección', 'place'=> 'Ingresa tu dirección', 'icon'=> 'fa-list-alt', 'required'=> true],
             ['type'=> 'select', 'name'=> 'departamento', 'label'=> 'Departamento', 'place'=> 'Ingresa tu departamento', 'icon'=> 'fa-lock', 'data'=> $deps],
-            ['type'=> 'select', 'name'=> 'city', 'label'=> 'Ciudad', 'place'=> 'Ingresa tu ciudad', 'icon'=> 'fa-lock', 'data'=> $muns],
+            ['type'=> 'select', 'name'=> 'city', 'label'=> 'Ciudad', 'place'=> 'Ingresa tu ciudad', 'icon'=> 'fa-lock', 'data'=> $muns, 'required'=> true],
             ['type'=> 'number', 'name'=> 'phone', 'label'=> 'Telefono', 'place'=> 'Ingresa tu telefono', 'icon'=> 'fa-phone'],
             ['type'=> 'number', 'name'=> 'mobile', 'label'=> 'Celular', 'place'=> 'Ingresa tu celular', 'icon'=> 'fa-mobile-phone']
         );
@@ -63,7 +63,7 @@ class TransaccionesController extends Controller
     {
         $data= $request->except(['_token', 'departamento']);
         $entidad= new Entidades($data);
-        $find= Entidades::where('document', $request->documento)->first();
+        $find= Entidades::where('document', $request->document)->first();
         if ($find){
             $entidad= $find;
             $entidad->fill($data);
@@ -74,9 +74,9 @@ class TransaccionesController extends Controller
         $bankinterfaz= InterfazBancos::all()->pluck('nombre', 'id');
 
         $form= array(
-            ['type'=> 'select', 'name'=> 'bankCode', 'label'=> 'Banco', 'icon'=> 'fa-id-card', 'place'=> '', 'data'=> $banks],
-            ['type'=> 'select', 'name'=> 'bankInterface', 'label'=> 'Interfaz', 'place'=> 'seleccione la interfaz', 'icon'=> 'fa-id-card', 'data'=> $bankinterfaz],
-            ['type'=> 'number', 'name'=> 'totalAmount', 'label'=> 'Valor a pagar', 'place'=> 'Ingresa el valor a pagar', 'icon'=> 'fa-list-alt'],
+            ['type'=> 'select', 'name'=> 'bankCode', 'label'=> 'Banco', 'icon'=> 'fa-id-card', 'place'=> '', 'data'=> $banks, 'required'=> true],
+            ['type'=> 'select', 'name'=> 'bankInterface', 'label'=> 'Interfaz', 'place'=> 'seleccione la interfaz', 'icon'=> 'fa-id-card', 'data'=> $bankinterfaz, 'required'=> true],
+            ['type'=> 'number', 'name'=> 'totalAmount', 'label'=> 'Valor a pagar', 'place'=> 'Ingresa el valor a pagar', 'icon'=> 'fa-list-alt', 'required'=> true],
         );
 
         return view('Transacciones.index', [
@@ -98,14 +98,13 @@ class TransaccionesController extends Controller
 
     public function soapPSE(String $funcion, Array $data= null)
     {
-        try {
-            $auth = $this->auth();
-            $soapClient = new SoapClient($this->URL, array('encoding' => 'UTF-8'));
-            $result = $soapClient->$funcion(array_merge(array('auth'=> $auth), $data));
-            return $result;
-        } catch (\Exception $e) {
-            return false;
-        }
+        $auth = $this->auth();
+        $body = array( 'auth'=> $auth );
+        if ( $data ) $body= array_merge( $body, $data );
+
+        $soapClient = new SoapClient($this->URL, array('encoding' => 'UTF-8'));
+        $result = $soapClient->$funcion( $body );
+        return $result;
     }
 
     public function getBankList() {
@@ -116,7 +115,7 @@ class TransaccionesController extends Controller
         
         Cache::put($cache_id, null , $minCache);
         $banks= Cache::get($cache_id);
-        if ($banks === null) {
+        if ( empty ($banks) ) {
             if ($result= $this->soapPSE('getBankList')){
                 $banks = $result->getBankListResult->item;
                 DB::statement('SET FOREIGN_KEY_CHECKS= 0');
@@ -170,15 +169,13 @@ class TransaccionesController extends Controller
             $data['buyer']= $data['payer'];
         }
         $data['additionalData']= array();
-        dd($data);
 
         if ($result= $this->soapPSE('createTransaction', ['transaction'=> $data])){
             $traz= new TransactionTraz();
-            $traz->request= $data->toJson();
-            $traz->response= $result->PSETransactionResponse->toJson();
+            $traz->request= json_encode( $data );
+            $traz->response= json_encode( $result->createTransactionResult );
             $traz->save();
         }
-        dd ($result);
-        return redirect($result->PSETransactionResponse->bankURL);
+        return redirect($result->createTransactionResult->bankURL);
     }
 }
