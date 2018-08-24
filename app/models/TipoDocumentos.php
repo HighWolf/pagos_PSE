@@ -10,6 +10,6 @@ class TipoDocumentos extends Model
 
     public function enidades()
     {
-		return $this->belongsTo('App\models\Entidades', 'tipo_doc');
+		return $this->belongsTo('App\models\Entidades', 'documentType');
 	}
 }

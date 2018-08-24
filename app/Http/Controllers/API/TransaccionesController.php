@@ -35,16 +35,16 @@ class TransaccionesController extends Controller
         $deps= Departamentos::all()->pluck('nombre', 'codigo_dane');
         $muns= Municipios::all()->pluck('nombre', 'codigo_dane');
         $form= array(
-            ['type'=> 'select', 'name'=> 'tipo_doc', 'label'=> 'Tipo de documento', 'place'=> 'Ingresa tu tipo de documento', 'icon'=> 'fa-id-card', 'data'=> $docs],
-            ['type'=> 'number', 'name'=> 'documento', 'label'=> 'Numero de documento', 'place'=> 'Ingresa tu numero de documento', 'icon'=> 'fa-id-card'],
-            ['type'=> 'text', 'name'=> 'nombres', 'label'=> 'Nombres', 'place'=> 'Ingresa tus nombres', 'icon'=> 'fa-user'],
-            ['type'=> 'text', 'name'=> 'apellidos', 'label'=> 'Apellidos', 'place'=> 'Ingresa tus apellidos', 'icon'=> 'fa-user'],
-            ['type'=> 'text', 'name'=> 'email', 'label'=> 'Email', 'place'=> 'Ingresa tu email', 'icon'=> 'fa-envelope'],
-            ['type'=> 'text', 'name'=> 'direccion', 'label'=> 'Dirección', 'place'=> 'Ingresa tu dirección', 'icon'=> 'fa-list-alt'],
+            ['type'=> 'select', 'name'=> 'documentType', 'label'=> 'Tipo de documento', 'place'=> 'Ingresa tu tipo de documento', 'icon'=> 'fa-id-card', 'data'=> $docs],
+            ['type'=> 'number', 'name'=> 'document', 'label'=> 'Numero de documento', 'place'=> 'Ingresa tu numero de documento', 'icon'=> 'fa-id-card'],
+            ['type'=> 'text', 'name'=> 'firstName', 'label'=> 'Nombres', 'place'=> 'Ingresa tus nombres', 'icon'=> 'fa-user'],
+            ['type'=> 'text', 'name'=> 'lastName', 'label'=> 'Apellidos', 'place'=> 'Ingresa tus apellidos', 'icon'=> 'fa-user'],
+            ['type'=> 'text', 'name'=> 'emailAddress', 'label'=> 'Email', 'place'=> 'Ingresa tu email', 'icon'=> 'fa-envelope'],
+            ['type'=> 'text', 'name'=> 'address', 'label'=> 'Dirección', 'place'=> 'Ingresa tu dirección', 'icon'=> 'fa-list-alt'],
             ['type'=> 'select', 'name'=> 'departamento', 'label'=> 'Departamento', 'place'=> 'Ingresa tu departamento', 'icon'=> 'fa-lock', 'data'=> $deps],
-            ['type'=> 'select', 'name'=> 'ciudad', 'label'=> 'Ciudad', 'place'=> 'Ingresa tu ciudad', 'icon'=> 'fa-lock', 'data'=> $muns],
-            ['type'=> 'number', 'name'=> 'telefono', 'label'=> 'Telefono', 'place'=> 'Ingresa tu telefono', 'icon'=> 'fa-phone'],
-            ['type'=> 'number', 'name'=> 'celular', 'label'=> 'Celular', 'place'=> 'Ingresa tu celular', 'icon'=> 'fa-mobile-phone']
+            ['type'=> 'select', 'name'=> 'city', 'label'=> 'Ciudad', 'place'=> 'Ingresa tu ciudad', 'icon'=> 'fa-lock', 'data'=> $muns],
+            ['type'=> 'number', 'name'=> 'phone', 'label'=> 'Telefono', 'place'=> 'Ingresa tu telefono', 'icon'=> 'fa-phone'],
+            ['type'=> 'number', 'name'=> 'mobile', 'label'=> 'Celular', 'place'=> 'Ingresa tu celular', 'icon'=> 'fa-mobile-phone']
         );
 
         return view('Transacciones.index', [
@@ -63,7 +63,7 @@ class TransaccionesController extends Controller
     {
         $data= $request->except(['_token', 'departamento']);
         $entidad= new Entidades($data);
-        $find= Entidades::where('documento', $request->documento)->first();
+        $find= Entidades::where('document', $request->documento)->first();
         if ($find){
             $entidad= $find;
             $entidad->fill($data);
@@ -151,23 +151,26 @@ class TransaccionesController extends Controller
         unset($data['created_at']);
         unset($data['updated_at']);
         $data['payer']= Entidades::find($data['payer'])->toArray();
-        $data['payer']['tipo_doc']= TipoDocumentos::find($data['payer']['tipo_doc'])->tipo;
+        $data['payer']['documentType']= TipoDocumentos::find($data['payer']['documentType'])->tipo;
         unset($data['payer']['id']);
         unset($data['payer']['created_at']);
         unset($data['payer']['updated_at']);
         $data['shipping']= Entidades::find($data['shipping'])->toArray();
-        $data['shipping']['tipo_doc']= TipoDocumentos::find($data['shipping']['tipo_doc'])->tipo;
+        $data['shipping']['documentType']= TipoDocumentos::find($data['shipping']['documentType'])->tipo;
         unset($data['shipping']['id']);
         unset($data['shipping']['created_at']);
         unset($data['shipping']['updated_at']);
-        if ($data['buyer']){
+        if (isset($data['buyer'])){
             $data['buyer']= Entidades::find($data['buyer'])->toArray();
-            $data['buyer']['tipo_doc']= TipoDocumentos::find($data['buyer']['tipo_doc'])->tipo;
+            $data['buyer']['documentType']= TipoDocumentos::find($data['buyer']['documentType'])->tipo;
             unset($data['buyer']['id']);
             unset($data['buyer']['created_at']);
             unset($data['buyer']['updated_at']);
+        } else {
+            $data['buyer']= $data['payer'];
         }
         $data['additionalData']= array();
+        dd($data);
 
         if ($result= $this->soapPSE('createTransaction', ['transaction'=> $data])){
             $traz= new TransactionTraz();
@@ -175,6 +178,7 @@ class TransaccionesController extends Controller
             $traz->response= $result->PSETransactionResponse->toJson();
             $traz->save();
         }
+        dd ($result);
         return redirect($result->PSETransactionResponse->bankURL);
     }
 }
