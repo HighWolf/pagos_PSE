@@ -8,7 +8,7 @@
                 @foreach ($form as $item)
                     <div class="form-group">
                         {{ Form::label($item['name'], $item['label']) }}
-                        @if ($payer)
+                        @if (isset($payer))
                             {{ Form::text('payer', $payer, ['hidden' => 'true']) }}
                         @endif
                         <div class="cols-sm-10 input-group">
