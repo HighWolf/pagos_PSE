@@ -17,8 +17,7 @@ use Illuminate\Support\Facades\Cache;
 
 use SoapClient;
 
-class TransaccionesController extends Controller
-{
+class TransaccionesController extends Controller {
 
     private $URL= 'https://api.placetopay.com/soap/pse/?wsdl';
     private $LOGIN= "6dd490faf9cb87a9862245da41170ff2";
@@ -29,8 +28,7 @@ class TransaccionesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index() {
         $docs= TipoDocumentos::pluck('desc', 'id')->all();
         $deps= Departamentos::all()->pluck('nombre', 'codigo_dane');
         $muns= Municipios::all()->pluck('nombre', 'codigo_dane');
@@ -59,8 +57,7 @@ class TransaccionesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function informacionPago(Request $request)
-    {
+    public function informacionPago(Request $request) {
         $data= $request->except(['_token', 'departamento']);
         $entidad= new Entidades($data);
         $find= Entidades::where('document', $request->document)->first();
@@ -86,7 +83,7 @@ class TransaccionesController extends Controller
         ]);
     }
 
-    private function auth(){
+    private function auth() {
         $seed= date('c');
         return array(
             'login'=> $this->LOGIN,
@@ -96,14 +93,32 @@ class TransaccionesController extends Controller
         );
     }
 
-    public function soapPSE(String $funcion, Array $data= null)
-    {
+    public function soapPSE(String $funcion, Array $data= null, int $transaccionid= null) {
+        $result= false;
+
         $auth = $this->auth();
         $body = array( 'auth'=> $auth );
         if ( $data ) $body= array_merge( $body, $data );
 
-        $soapClient = new SoapClient($this->URL, array('encoding' => 'UTF-8'));
-        $result = $soapClient->$funcion( $body );
+        try {
+            $soapClient = new SoapClient($this->URL, array( 'encoding' => 'UTF-8' ));
+            $result = $soapClient->$funcion( $body );
+        } catch ( Exception $e ) { }
+
+        $traz= new TransactionTraz();
+        $traz->request= json_encode( $data );
+        $traz->response= json_encode( $result );
+        $traz->save();
+
+        if ( !empty( $transaccionid ) && preg_match( '/[t|T]ransaction/', $funcion ) ) {
+            $transaccion= Transacciones::find($transaccionid);
+            $funcion.= 'Result';
+            foreach ($result->$funcion as $key => $value) {
+                $transaccion[ $key ]= $value;
+            }
+            $transaccion->save();
+        }
+
         return $result;
     }
 
@@ -135,11 +150,11 @@ class TransaccionesController extends Controller
         return $banks;
     }
 
-    public function getTransactionRequest(Request $request) 
-    {
+    public function getTransactionRequest(Request $request) {
         $data= $request->except(['_token']);
         $transaccion= new Transacciones($data);
         $transaccion->reference = bin2hex(random_bytes(10));
+        $transaccion->returnURL = "http://pagospse.com/transacciones/retorno/".$transaccion->reference;
         $transaccion->shipping= $transaccion->payer;
         $transaccion->ipAddress= $request->ip();
         $transaccion->userAgent= $request->header('User-Agent');
@@ -170,12 +185,27 @@ class TransaccionesController extends Controller
         }
         $data['additionalData']= array();
 
-        if ($result= $this->soapPSE('createTransaction', ['transaction'=> $data])){
-            $traz= new TransactionTraz();
-            $traz->request= json_encode( $data );
-            $traz->response= json_encode( $result->createTransactionResult );
-            $traz->save();
-        }
+        $result= $this->soapPSE('createTransaction', ['transaction'=> $data], $transaccion->id);
+        
         return redirect($result->createTransactionResult->bankURL);
+    }
+
+    public function getTransactionResult(String $reference) {
+        $transaccion= Transacciones::where( 'reference', $reference )->get( [ 'id', 'transactionID'] )->first();
+        $mensaje= "Error al consultar el estado de la transaccion.";
+        $estado= "Transaccion pendiente";
+        if ( $result= $this->soapPSE( 'getTransactionInformation', [ 'transactionID'=> $transaccion->transactionID ], $transaccion->id ) ) {
+            $result= $result->getTransactionInformationResult;
+            if ( $result->transactionState == "OK" )
+                $estado= "Transaccion exitosa";
+            else if ( $result->transactionState != "PENDING" )
+                $estado= "Transaccion fallida";
+            $mensaje= $result->responseReasonText;
+        }
+
+        return view('Transacciones.mensaje', [
+            'estado'=> $estado,
+            'mensaje'=> $mensaje
+        ]);
     }
 }

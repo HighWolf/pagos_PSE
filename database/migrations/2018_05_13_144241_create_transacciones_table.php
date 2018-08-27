@@ -31,12 +31,28 @@ class CreateTransaccionesTable extends Migration
             $table->unsignedInteger('shipping');
             $table->string('ipAddress', 15);
             $table->string('userAgent', 255);
+            $table->unsignedInteger('transactionID')->nullable();
+            $table->string('sessionID', 32)->nullable();
+            $table->string('bankCurrency', 3)->nullable();
+            $table->float('bankFactor')->nullable();
+            $table->string('bankURL', 255)->nullable();
+            $table->string('returnCode', 30)->nullable();
+            $table->string('bankProcessDate')->nullable();
+            $table->string('trazabilityCode', 40)->nullable();
+            $table->Integer('transactionCycle')->nullable();
+            $table->string('transactionState', 20)->nullable();
+            $table->unsignedInteger('responseCode')->nullable();
+            $table->string('responseReasonCode', 3)->nullable();
+            $table->string('responseReasonText', 255)->nullable();
+            $table->string('requestDate')->nullable();
+            $table->boolean('onTest')->nullable();
             $table->timestamps();
             $table->foreign('bankCode')->references('bankCode')->on('bancos');
             $table->foreign('bankInterface')->references('id')->on('interfaz_bancos');
             $table->foreign('payer')->references('id')->on('entidades');
             $table->foreign('buyer')->references('id')->on('entidades');
             $table->foreign('shipping')->references('id')->on('entidades');
+            $table->unique('reference');
         });
     }
 

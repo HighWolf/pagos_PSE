@@ -15,15 +15,23 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('transacciones', 'API\TransaccionesController@index');
+Route::get('transacciones', [
+    'uses' => 'API\TransaccionesController@index',
+    'as' => 'transacciones'
+]);
 
 Route::post('transacciones/informacionpago',[
-  'uses' => 'API\TransaccionesController@informacionPago',
-  'as' => 'transacciones.informacionpago'
+    'uses' => 'API\TransaccionesController@informacionPago',
+    'as' => 'transacciones.informacionpago'
 ]);
 
 Route::post('transacciones/getTransactionRequest',[
-  'uses' => 'API\TransaccionesController@getTransactionRequest',
-  'as' => 'transacciones.getTransactionRequest'
+    'uses' => 'API\TransaccionesController@getTransactionRequest',
+    'as' => 'transacciones.getTransactionRequest'
+]);
+
+Route::get('transacciones/retorno/{reference}',[
+    'uses' => 'API\TransaccionesController@getTransactionResult',
+    'as' => 'transacciones.getTransactionResult'
 ]);
 
