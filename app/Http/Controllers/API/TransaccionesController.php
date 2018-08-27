@@ -190,7 +190,7 @@ class TransaccionesController extends Controller {
         return redirect($result->createTransactionResult->bankURL);
     }
 
-    public function getTransactionResult(String $reference) {
+    public function getTransactionResult(String $reference, int $auto= null) {
         $transaccion= Transacciones::where( 'reference', $reference )->get( [ 'id', 'transactionID'] )->first();
         $mensaje= "Error al consultar el estado de la transaccion.";
         $estado= "Transaccion pendiente";
@@ -202,6 +202,9 @@ class TransaccionesController extends Controller {
                 $estado= "Transaccion fallida";
             $mensaje= $result->responseReasonText;
         }
+
+        if ( !empty( $auto ) )
+            return true;
 
         return view('Transacciones.mensaje', [
             'estado'=> $estado,
