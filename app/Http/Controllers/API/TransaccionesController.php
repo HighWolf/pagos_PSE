@@ -30,11 +30,15 @@ class TransaccionesController extends Controller {
      */
     public function index() {
         $docs= TipoDocumentos::pluck('desc', 'id')->all();
-        $deps= Departamentos::all()->pluck('nombre', 'codigo_dane');
-        $muns= Municipios::all()->pluck('nombre', 'codigo_dane');
+        $deps= Departamentos::all()
+            ->orderBy('nombre', 'asc')
+            ->pluck('nombre', 'codigo_dane');
+        $muns= Municipios::all()
+            ->orderBy('nombre', 'asc')
+            ->pluck('nombre', 'codigo_dane');
         $form= array(
             ['type'=> 'select', 'name'=> 'documentType', 'label'=> 'Tipo de documento', 'place'=> 'Ingresa tu tipo de documento', 'icon'=> 'fa-id-card', 'data'=> $docs, 'required'=> true],
-            ['type'=> 'number', 'name'=> 'document', 'label'=> 'Numero de documento', 'place'=> 'Ingresa tu numero de documento', 'icon'=> 'fa-id-card', 'required'=> true],
+            ['type'=> 'text', 'name'=> 'document', 'label'=> 'Numero de documento', 'place'=> 'Ingresa tu numero de documento', 'icon'=> 'fa-id-card', 'required'=> true],
             ['type'=> 'text', 'name'=> 'firstName', 'label'=> 'Nombres', 'place'=> 'Ingresa tus nombres', 'icon'=> 'fa-user', 'required'=> true],
             ['type'=> 'text', 'name'=> 'lastName', 'label'=> 'Apellidos', 'place'=> 'Ingresa tus apellidos', 'icon'=> 'fa-user'],
             ['type'=> 'email', 'name'=> 'emailAddress', 'label'=> 'Email', 'place'=> 'Ingresa tu email', 'icon'=> 'fa-envelope', 'required'=> true],
