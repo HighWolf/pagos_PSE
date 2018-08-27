@@ -31,10 +31,10 @@ class TransaccionesController extends Controller {
     public function index() {
         $docs= TipoDocumentos::pluck('desc', 'id')->all();
         $deps= Departamentos::all()
-            ->orderBy('nombre', 'asc')
+            ->sortBy('nombre')
             ->pluck('nombre', 'codigo_dane');
         $muns= Municipios::all()
-            ->orderBy('nombre', 'asc')
+            ->sortBy('nombre')
             ->pluck('nombre', 'codigo_dane');
         $form= array(
             ['type'=> 'select', 'name'=> 'documentType', 'label'=> 'Tipo de documento', 'place'=> 'Ingresa tu tipo de documento', 'icon'=> 'fa-id-card', 'data'=> $docs, 'required'=> true],
