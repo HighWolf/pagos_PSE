@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\ChechTransaction' => $baseDir . '/app/Console/Commands/ChechTransaction.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
     'App\\Http\\Controllers\\API\\TransaccionesController' => $baseDir . '/app/Http/Controllers/API/TransaccionesController.php',
@@ -1452,6 +1453,13 @@ return array(
     'JakubOnderka\\PhpConsoleColor\\ConsoleColor' => $vendorDir . '/jakub-onderka/php-console-color/src/JakubOnderka/PhpConsoleColor/ConsoleColor.php',
     'JakubOnderka\\PhpConsoleColor\\InvalidStyleException' => $vendorDir . '/jakub-onderka/php-console-color/src/JakubOnderka/PhpConsoleColor/InvalidStyleException.php',
     'JakubOnderka\\PhpConsoleHighlighter\\Highlighter' => $vendorDir . '/jakub-onderka/php-console-highlighter/src/JakubOnderka/PhpConsoleHighlighter/Highlighter.php',
+    'Laracasts\\Flash\\Flash' => $vendorDir . '/laracasts/flash/src/Laracasts/Flash/Flash.php',
+    'Laracasts\\Flash\\FlashNotifier' => $vendorDir . '/laracasts/flash/src/Laracasts/Flash/FlashNotifier.php',
+    'Laracasts\\Flash\\FlashServiceProvider' => $vendorDir . '/laracasts/flash/src/Laracasts/Flash/FlashServiceProvider.php',
+    'Laracasts\\Flash\\LaravelSessionStore' => $vendorDir . '/laracasts/flash/src/Laracasts/Flash/LaravelSessionStore.php',
+    'Laracasts\\Flash\\Message' => $vendorDir . '/laracasts/flash/src/Laracasts/Flash/Message.php',
+    'Laracasts\\Flash\\OverlayMessage' => $vendorDir . '/laracasts/flash/src/Laracasts/Flash/OverlayMessage.php',
+    'Laracasts\\Flash\\SessionStore' => $vendorDir . '/laracasts/flash/src/Laracasts/Flash/SessionStore.php',
     'Laravel\\Tinker\\ClassAliasAutoloader' => $vendorDir . '/laravel/tinker/src/ClassAliasAutoloader.php',
     'Laravel\\Tinker\\Console\\TinkerCommand' => $vendorDir . '/laravel/tinker/src/Console/TinkerCommand.php',
     'Laravel\\Tinker\\TinkerCaster' => $vendorDir . '/laravel/tinker/src/TinkerCaster.php',

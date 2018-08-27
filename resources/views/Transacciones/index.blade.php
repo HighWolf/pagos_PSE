@@ -3,6 +3,9 @@
 @section('contenido')
     <div class="row content">
         <div class="col-sm-6 col-sm-offset-3">
+            @include('flash::message')
+        </div>
+        <div class="col-sm-6 col-sm-offset-3">
             <h5>Realice su pago por PSE.</h5>
             {!! Form::open(['route'=>$ruta, 'method'=>'POST', 'data-toggle'=>'validator', 'role'=>'form']) !!}
                 @foreach ($form as $item)

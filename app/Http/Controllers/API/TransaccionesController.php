@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 
 use SoapClient;
+use SoapFault;
 
 class TransaccionesController extends Controller {
 
@@ -107,7 +108,9 @@ class TransaccionesController extends Controller {
         try {
             $soapClient = new SoapClient($this->URL, array( 'encoding' => 'UTF-8' ));
             $result = $soapClient->$funcion( $body );
-        } catch ( Exception $e ) { }
+        } catch ( SoapFault $e ) {
+            return false;
+        }
 
         $traz= new TransactionTraz();
         $traz->request= json_encode( $data );
