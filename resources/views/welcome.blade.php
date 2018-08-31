@@ -83,7 +83,7 @@
                 </div>
 
                 <div class="links">
-                    <a href=" {{ route ('transacciones2') }} ">Iniciar Transacción</a>
+                    <a href=" {{ route ('transacciones') }} ">Iniciar Transacción</a>
                 </div>
             </div>
         </div>
